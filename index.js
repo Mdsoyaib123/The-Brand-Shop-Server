@@ -1,6 +1,7 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { config } = require('dotenv');
 
 const app = express()
 const port = process.env.PORT || 5000;
@@ -17,6 +18,7 @@ app.use(express.json());
 const uri = "mongodb+srv://mdsoyaibsourav:SHwEM3yQAPpIGML1@cluster0.hzg7hl2.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -25,10 +27,99 @@ const client = new MongoClient(uri, {
   }
 });
 
+
+    const productCollection = client.db('user').collection('productCollection')
+    const myCartCollection = client.db('user').collection('myCartCollection')
+
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+    app.get('/brands',async(req,res)=>{
+      const curser = productCollection.find()
+      const result = await curser.toArray();
+      res.send(result);
+    })
+
+    app.get(`/brands/:brandName`,async(req,res)=>{
+      const brandName = req.params.brandName ;
+      // console.log(brandName);
+      const query ={brandName: brandName}
+      // console.log(query);
+      const cursor = productCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    app.get('/brands/:name',async(req,res)=>{
+      const name = req.params.name ;
+      console.log(name);
+      const query = {name: name};
+      const cursor =await productCollection.findOne(query)
+      res.send(cursor)
+
+    })
+
+
+
+    
+
+
+
+    app.post('/brands',async(req,res)=>{
+      const data = req.body
+      console.log(data);
+      const result = await productCollection.insertOne(data)
+      res.send(result)
+
+    })
+    // app.put('/brands/:name',(req,res)=>{
+    //   const name = req.params.name ;
+    //   console.log();
+    //   const filter = {name:name};
+      
+      
+    // })
+
+
+
+
+
+
+
+
+
+
+
+
+    app.get('/cart',async(req,res)=>{
+      const cursor = myCartCollection.find();
+        const result = await cursor.toArray();
+        res.send(result)
+    })
+    app.get('/cart/:name',async(req,res)=>{
+      const name = req.params.name;
+      console.log(name);
+      const query = {name:name};
+      const result = await myCartCollection.findOne(query);
+      res.send(result)
+    })
+
+    app.post('/cart',async(req,res)=>{
+      const data = req.body ;
+      console.log(data);
+      const result = await myCartCollection.insertOne(data);
+      res.send(result)
+    })
+
+    app.delete('/cart/:name',async(req,res)=>{
+      const name = req.params.name ;
+      console.log(name);
+      const query = {name:name };
+      const result = await myCartCollection.deleteOne(query);
+      res.send(result)
+    })
 
 
 
@@ -53,3 +144,10 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
+
+
+
+
+
+// /my-cart/:email
+// {purchasedBy:....}
