@@ -1,6 +1,6 @@
 const express = require('express')
 const cors = require('cors')
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId, HostAddress } = require('mongodb');
 const { config } = require('dotenv');
 
 const app = express()
@@ -13,7 +13,7 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-
+// console.log(process.env.DB_USER);
 
 const uri = "mongodb+srv://mdsoyaibsourav:SHwEM3yQAPpIGML1@cluster0.hzg7hl2.mongodb.net/?retryWrites=true&w=majority";
 
@@ -36,15 +36,15 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
+
     app.get('/brands',async(req,res)=>{
       const curser = productCollection.find()
       const result = await curser.toArray();
       res.send(result);
     })
-
     app.get(`/brands/:brandName`,async(req,res)=>{
       const brandName = req.params.brandName ;
-      // console.log(brandName);
+      //console.log(brandName);
       const query ={brandName: brandName}
       // console.log(query);
       const cursor = productCollection.find(query);
@@ -52,21 +52,17 @@ async function run() {
       res.send(result)
     })
 
-    app.get('/brands/:name',async(req,res)=>{
-      const name = req.params.name ;
+    app.get('/brand/:name',async(req,res)=>{
+      const name= req.params.name ;
       console.log(name);
-      const query = {name: name};
+      const query = {name:name};
       const cursor =await productCollection.findOne(query)
       res.send(cursor)
-
     })
 
 
 
-    
-
-
-
+  
     app.post('/brands',async(req,res)=>{
       const data = req.body
       console.log(data);
@@ -74,19 +70,27 @@ async function run() {
       res.send(result)
 
     })
-    // app.put('/brands/:name',(req,res)=>{
-    //   const name = req.params.name ;
-    //   console.log();
-    //   const filter = {name:name};
-      
-      
-    // })
 
-
-
-
-
-
+    app.patch('/brand/:id',async(req,res)=>{
+      const id = req.params.id ;
+      console.log(id);
+      const data = req.body
+      const filter = {_id:new ObjectId(id)};
+      const options = { upsert: true };
+      const updateProduct = {
+        $set: {
+          name:data.name,
+          img:data.img,
+          product:data.product,
+          brandName:data.brandName,
+          price:data.price,
+          rating:data.rating,
+          description:data.description
+        },
+      };
+      const result =  await productCollection.updateOne(filter, updateProduct, options);
+      res.send(result)
+    })
 
 
 
@@ -149,5 +153,7 @@ app.listen(port, () => {
 
 
 
-// /my-cart/:email
-// {purchasedBy:....}
+
+
+
+
