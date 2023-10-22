@@ -38,29 +38,40 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
-
+    // load all data 
     app.get('/brands',async(req,res)=>{
       const curser = productCollection.find()
       const result = await curser.toArray();
       res.send(result);
     })
+
+    // load brandName wise 4 data
     app.get(`/brands/:brandName`,async(req,res)=>{
       const brandName = req.params.brandName ;
-      //console.log(brandName);
+      console.log(brandName);
       const query ={brandName: brandName}
       // console.log(query);
       const cursor = productCollection.find(query);
       const result = await cursor.toArray();
       res.send(result)
     })
+    
 
+    // update er data 
     app.get('/brand/:name',async(req,res)=>{
       const name= req.params.name ;
       console.log(name);
       const query = {name:name};
       const cursor =await productCollection.findOne(query)
+      res.send(cursor)
+    })
+    app.get('/detelis/:name',async(req,res)=>{
+      const name= req.params.name ;
+      console.log(name);
+      const query = {name:name}
+      const cursor = await productCollection.findOne(query);
       res.send(cursor)
     })
 
@@ -100,12 +111,13 @@ async function run() {
 
 
 
-
+    // MyCart a all data dekha nor jonno
     app.get('/cart',async(req,res)=>{
       const cursor = myCartCollection.find();
         const result = await cursor.toArray();
         res.send(result)
     })
+    // delete korar jonno
     app.get('/cart/:name',async(req,res)=>{
       const name = req.params.name;
       console.log(name);
@@ -134,7 +146,7 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
@@ -159,5 +171,4 @@ app.listen(port, () => {
 
 
 
-// vaiya amar view detelis a click korle error dicce but ekto age sob thik selo 
-
+// vaiya varcel a deploy korar por vaiya problem hosse
